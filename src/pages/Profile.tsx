@@ -1,21 +1,36 @@
 import React, { useState } from 'react';
-import type { Work, Author, CurrentUser } from '../types';
+import type { Work, Author, CurrentUser, CompletionRecord } from '../types';
 import { WorkCard } from '../components/WorkCard';
 
 interface Props {
   works: Work[];
   authors: Author[];
   currentUser: CurrentUser;
+  completions: CompletionRecord[];
+  completedWorkIds: string[];
   onOpenWork: (id: string) => void;
   onTogglePublish: (workId: string) => void;
   onNavigate: (page: string) => void;
 }
 
-export const Profile: React.FC<Props> = ({ works, authors, currentUser, onOpenWork, onTogglePublish, onNavigate }) => {
-  const [tab, setTab] = useState<'works' | 'favorites'>('works');
+export const Profile: React.FC<Props> = ({ works, authors, currentUser, completions, completedWorkIds, onOpenWork, onTogglePublish, onNavigate }) => {
+  const [tab, setTab] = useState<'works' | 'favorites' | 'history'>('works');
 
   const myWorks = works.filter((w) => w.authorId === currentUser.id);
   const favWorks = works.filter((w) => w.favorites.includes(currentUser.id));
+  const completedRecords = completions
+    .filter((c) => c.userId === currentUser.id)
+    .sort((a, b) => b.completedAt - a.completedAt)
+    .map((c) => {
+      const work = works.find((w) => w.id === c.workId);
+      return { ...c, work };
+    })
+    .filter((item) => item.work) as Array<CompletionRecord & { work: Work }>;
+
+  const formatDate = (ts: number) => {
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  };
   const displayWorks = tab === 'works' ? myWorks : favWorks;
 
   const currentAuthor = authors.find((a) => a.id === currentUser.id);
@@ -41,9 +56,41 @@ export const Profile: React.FC<Props> = ({ works, authors, currentUser, onOpenWo
         <button className={`tab-btn ${tab === 'favorites' ? 'active' : ''}`} onClick={() => setTab('favorites')}>
           我的收藏
         </button>
+        <button className={`tab-btn ${tab === 'history' ? 'active' : ''}`} onClick={() => setTab('history')}>
+          学习历史
+        </button>
       </div>
 
-      {displayWorks.length === 0 ? (
+      {tab === 'history' ? (
+        completedRecords.length === 0 ? (
+          <div className="empty-state">
+            <div className="icon">📚</div>
+            <p>还没有学习记录</p>
+            <p style={{ fontSize: 13, color: '#ccc', marginTop: 4 }}>看完教程后标记完成，记录你的学习足迹</p>
+          </div>
+        ) : (
+          <div>
+            <div style={{ marginBottom: 16, fontSize: 13, color: '#888' }}>
+              共完成 <strong style={{ color: '#388e3c' }}>{completedRecords.length}</strong> 个教程
+            </div>
+            {completedRecords.map((record) => (
+              <div key={record.workId} className="history-card" onClick={() => onOpenWork(record.workId)}>
+                <img src={record.work.cover} alt={record.work.title} className="history-cover" />
+                <div className="history-info">
+                  <h4 className="history-title">{record.work.title}</h4>
+                  <p className="history-meta">
+                    {record.work.category} · {record.work.difficulty} · {record.work.steps.length} 个步骤
+                  </p>
+                  <p className="history-time">
+                    <span className="history-check">✓</span> 完成于 {formatDate(record.completedAt)}
+                  </p>
+                </div>
+                <div className="history-arrow">→</div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : displayWorks.length === 0 ? (
         <div className="empty-state">
           <div className="icon">{tab === 'works' ? '📦' : '⭐'}</div>
           <p>{tab === 'works' ? '还没有发布作品' : '还没有收藏作品'}</p>
@@ -81,7 +128,15 @@ export const Profile: React.FC<Props> = ({ works, authors, currentUser, onOpenWo
         <div className="waterfall">
           {favWorks.map((w) => {
             const author = authors.find((a) => a.id === w.authorId);
-            return <WorkCard key={w.id} work={w} author={author} onClick={onOpenWork} />;
+            return (
+              <WorkCard
+                key={w.id}
+                work={w}
+                author={author}
+                isCompleted={completedWorkIds.includes(w.id)}
+                onClick={onOpenWork}
+              />
+            );
           })}
         </div>
       )}

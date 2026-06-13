@@ -1,9 +1,10 @@
-import type { Work, Author, CurrentUser } from '../types';
+import type { Work, Author, CurrentUser, CompletionRecord } from '../types';
 
 const KEYS = {
   works: 'craft_works',
   authors: 'craft_authors',
   user: 'craft_current_user',
+  completions: 'craft_completions',
 };
 
 function read<T>(key: string): T | null {
@@ -80,4 +81,43 @@ export function setCurrentUser(user: CurrentUser): void {
 
 export function clearCurrentUser(): void {
   localStorage.removeItem(KEYS.user);
+}
+
+/* Completion Records */
+export function getCompletions(): CompletionRecord[] {
+  return read<CompletionRecord[]>(KEYS.completions) || [];
+}
+
+export function saveCompletions(completions: CompletionRecord[]): void {
+  write(KEYS.completions, completions);
+}
+
+export function getCompletionsByUser(userId: string): CompletionRecord[] {
+  return getCompletions()
+    .filter((c) => c.userId === userId)
+    .sort((a, b) => b.completedAt - a.completedAt);
+}
+
+export function isWorkCompleted(workId: string, userId: string): boolean {
+  return getCompletions().some((c) => c.workId === workId && c.userId === userId);
+}
+
+export function toggleCompletion(workId: string, userId: string): boolean {
+  const completions = getCompletions();
+  const idx = completions.findIndex((c) => c.workId === workId && c.userId === userId);
+  if (idx !== -1) {
+    completions.splice(idx, 1);
+    saveCompletions(completions);
+    return false;
+  } else {
+    completions.push({ workId, userId, completedAt: Date.now() });
+    saveCompletions(completions);
+    return true;
+  }
+}
+
+export function getCompletedWorkIdsByUser(userId: string): string[] {
+  return getCompletions()
+    .filter((c) => c.userId === userId)
+    .map((c) => c.workId);
 }

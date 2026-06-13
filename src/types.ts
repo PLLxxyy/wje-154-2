@@ -53,3 +53,9 @@ export interface CurrentUser {
   name: string;
   avatar: string;
 }
+
+export interface CompletionRecord {
+  workId: string;
+  userId: string;
+  completedAt: number;
+}

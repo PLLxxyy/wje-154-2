@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import type { Category, Work, Author } from '../types';
+import type { Category, Work, Author, CurrentUser } from '../types';
 import { WorkCard } from '../components/WorkCard';
 
 const CATEGORIES: Category[] = ['烘焙', '编织', '木工', '陶艺', '皮具', '花艺'];
@@ -7,10 +7,12 @@ const CATEGORIES: Category[] = ['烘焙', '编织', '木工', '陶艺', '皮具'
 interface Props {
   works: Work[];
   authors: Author[];
+  currentUser: CurrentUser | null;
+  completedWorkIds: string[];
   onOpenWork: (id: string) => void;
 }
 
-export const Home: React.FC<Props> = ({ works, authors, onOpenWork }) => {
+export const Home: React.FC<Props> = ({ works, authors, currentUser, completedWorkIds, onOpenWork }) => {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<Category | ''>('');
   const [sort, setSort] = useState<'newest' | 'hottest'>('newest');
@@ -92,7 +94,13 @@ export const Home: React.FC<Props> = ({ works, authors, onOpenWork }) => {
       {filtered.length > 0 ? (
         <div className="waterfall">
           {filtered.map((w) => (
-            <WorkCard key={w.id} work={w} author={getAuthor(w.authorId)} onClick={onOpenWork} />
+            <WorkCard
+              key={w.id}
+              work={w}
+              author={getAuthor(w.authorId)}
+              isCompleted={currentUser ? completedWorkIds.includes(w.id) : false}
+              onClick={onOpenWork}
+            />
           ))}
         </div>
       ) : (

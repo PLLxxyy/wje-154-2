@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { CurrentUser, Work, Author } from './types';
+import type { CurrentUser, Work, Author, CompletionRecord } from './types';
 import { seedIfNeeded } from './utils/seed';
 import {
   getWorks, getAuthors, getCurrentUser, setCurrentUser, clearCurrentUser,
   updateWork, getAuthorById, updateAuthor,
+  getCompletions, toggleCompletion, getCompletionsByUser,
 } from './utils/storage';
 import { Header } from './components/Header';
 import { LoginModal } from './components/LoginModal';
@@ -33,11 +34,13 @@ const App: React.FC = () => {
   const [currentUser, setUser] = useState<CurrentUser | null>(null);
   const [works, setWorks] = useState<Work[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
+  const [completions, setCompletions] = useState<CompletionRecord[]>([]);
   const [showLogin, setShowLogin] = useState(false);
 
   const refreshData = useCallback(() => {
     setWorks([...getWorks()]);
     setAuthors([...getAuthors()]);
+    setCompletions([...getCompletions()]);
   }, []);
 
   useEffect(() => {
@@ -121,6 +124,24 @@ const App: React.FC = () => {
     refreshData();
   }, [currentUser, refreshData]);
 
+  const handleToggleComplete = useCallback((workId: string) => {
+    if (!currentUser) { setShowLogin(true); return; }
+    toggleCompletion(workId, currentUser.id);
+    refreshData();
+  }, [currentUser, refreshData]);
+
+  const getCompletionByWorkAndUser = useCallback((workId: string, userId: string) => {
+    return completions.find((c) => c.workId === workId && c.userId === userId);
+  }, [completions]);
+
+  const isWorkCompletedByUser = useCallback((workId: string, userId: string) => {
+    return completions.some((c) => c.workId === workId && c.userId === userId);
+  }, [completions]);
+
+  const completedWorkIds = currentUser
+    ? completions.filter((c) => c.userId === currentUser.id).map((c) => c.workId)
+    : [];
+
   const handleFollow = useCallback((authorId: string) => {
     if (!currentUser) { setShowLogin(true); return; }
     const author = getAuthorById(authorId);
@@ -162,19 +183,32 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (page) {
       case 'home':
-        return <Home works={works} authors={authors} onOpenWork={handleOpenWork} />;
+        return (
+          <Home
+            works={works}
+            authors={authors}
+            currentUser={currentUser}
+            completedWorkIds={completedWorkIds}
+            onOpenWork={handleOpenWork}
+          />
+        );
       case 'detail': {
         const w = works.find((x) => x.id === selectedWorkId);
         if (!w) return <div className="empty-state"><p>作品不存在</p></div>;
         const author = authors.find((a) => a.id === w.authorId);
+        const completed = currentUser ? isWorkCompletedByUser(w.id, currentUser.id) : false;
+        const completionRec = currentUser ? getCompletionByWorkAndUser(w.id, currentUser.id) : undefined;
         return (
           <WorkDetail
             work={w}
             author={author}
             currentUser={currentUser}
+            isCompleted={completed}
+            completionRecord={completionRec}
             onBack={() => navigate('home')}
             onToggleLike={handleToggleLike}
             onToggleFavorite={handleToggleFavorite}
+            onToggleComplete={handleToggleComplete}
             onFollow={handleFollow}
             onAddComment={handleAddComment}
           />
@@ -198,6 +232,8 @@ const App: React.FC = () => {
             works={works}
             authors={authors}
             currentUser={currentUser}
+            completions={completions}
+            completedWorkIds={completedWorkIds}
             onOpenWork={handleOpenWork}
             onTogglePublish={handleTogglePublish}
             onNavigate={(p) => navigate(p)}
@@ -210,6 +246,7 @@ const App: React.FC = () => {
             works={works}
             authors={authors}
             currentUser={currentUser}
+            completedWorkIds={completedWorkIds}
             onOpenWork={handleOpenWork}
           />
         );

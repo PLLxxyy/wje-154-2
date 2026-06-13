@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Work, Author, CurrentUser } from '../types';
+import type { Work, Author, CurrentUser, CompletionRecord } from '../types';
 import { AuthorCard } from '../components/AuthorCard';
 import { CommentSection } from '../components/CommentSection';
 
@@ -7,20 +7,29 @@ interface Props {
   work: Work;
   author: Author | undefined;
   currentUser: CurrentUser | null;
+  isCompleted: boolean;
+  completionRecord?: CompletionRecord;
   onBack: () => void;
   onToggleLike: (workId: string) => void;
   onToggleFavorite: (workId: string) => void;
+  onToggleComplete: (workId: string) => void;
   onFollow: (authorId: string) => void;
   onAddComment: (workId: string, text: string) => void;
 }
 
 export const WorkDetail: React.FC<Props> = ({
-  work, author, currentUser, onBack, onToggleLike, onToggleFavorite, onFollow, onAddComment,
+  work, author, currentUser, isCompleted, completionRecord,
+  onBack, onToggleLike, onToggleFavorite, onToggleComplete, onFollow, onAddComment,
 }) => {
   const isLiked = currentUser ? work.likes.includes(currentUser.id) : false;
   const isFavorited = currentUser ? work.favorites.includes(currentUser.id) : false;
 
   const diffClass = work.difficulty === '简单' ? 'easy' : work.difficulty === '中等' ? 'medium' : 'hard';
+
+  const formatDate = (ts: number) => {
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
 
   return (
     <div>
@@ -28,6 +37,29 @@ export const WorkDetail: React.FC<Props> = ({
       <div className="detail-page">
         <div className="detail-main">
           <h1 className="detail-title">{work.title}</h1>
+
+          {currentUser && (
+            <div className={`completion-status-bar ${isCompleted ? 'completed' : 'not-completed'}`}>
+              <span className="completion-status-icon">{isCompleted ? '✅' : '📖'}</span>
+              <div className="completion-status-text">
+                <div className="title">
+                  {isCompleted ? '已完成学习' : '开始学习了吗？'}
+                </div>
+                <div className="desc">
+                  {isCompleted
+                    ? `完成于 ${completionRecord ? formatDate(completionRecord.completedAt) : ''}`
+                    : '看完教程后标记完成，记录你的学习足迹'}
+                </div>
+              </div>
+              <button
+                className={`btn-toggle-complete ${isCompleted ? 'completed' : 'not-completed'}`}
+                onClick={(e) => { e.stopPropagation(); onToggleComplete(work.id); }}
+              >
+                {isCompleted ? '取消完成' : '标记完成'}
+              </button>
+            </div>
+          )}
+
           <div className="detail-info">
             <span className="tag">{work.category}</span>
             <span className={`difficulty-badge difficulty-${diffClass}`}>{work.difficulty}</span>

@@ -4,13 +4,22 @@ import type { Work, Author } from '../types';
 interface Props {
   work: Work;
   author: Author | undefined;
+  isCompleted?: boolean;
   onClick: (id: string) => void;
 }
 
-export const WorkCard: React.FC<Props> = ({ work, author, onClick }) => {
+export const WorkCard: React.FC<Props> = ({ work, author, isCompleted, onClick }) => {
   return (
     <div className="work-card" onClick={() => onClick(work.id)}>
-      <img className="card-cover" src={work.cover} alt={work.title} style={{ height: 200 + (parseInt(work.id.replace(/\D/g, ''), 10) % 4) * 30 }} />
+      <div className="card-cover-wrap">
+        <img className="card-cover" src={work.cover} alt={work.title} style={{ height: 200 + (parseInt(work.id.replace(/\D/g, ''), 10) % 4) * 30 }} />
+        {isCompleted && (
+          <div className="completion-badge">
+            <span className="completion-check">✓</span>
+            <span>已完成</span>
+          </div>
+        )}
+      </div>
       <div className="card-body">
         <div className="card-title">{work.title}</div>
         <div className="card-meta">

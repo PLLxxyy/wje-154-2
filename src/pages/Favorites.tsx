@@ -6,10 +6,11 @@ interface Props {
   works: Work[];
   authors: Author[];
   currentUser: CurrentUser;
+  completedWorkIds: string[];
   onOpenWork: (id: string) => void;
 }
 
-export const Favorites: React.FC<Props> = ({ works, authors, currentUser, onOpenWork }) => {
+export const Favorites: React.FC<Props> = ({ works, authors, currentUser, completedWorkIds, onOpenWork }) => {
   const favWorks = works.filter((w) => w.favorites.includes(currentUser.id));
   const getAuthor = (id: string): Author | undefined => authors.find((a) => a.id === id);
 
@@ -19,7 +20,13 @@ export const Favorites: React.FC<Props> = ({ works, authors, currentUser, onOpen
       {favWorks.length > 0 ? (
         <div className="waterfall">
           {favWorks.map((w) => (
-            <WorkCard key={w.id} work={w} author={getAuthor(w.authorId)} onClick={onOpenWork} />
+            <WorkCard
+              key={w.id}
+              work={w}
+              author={getAuthor(w.authorId)}
+              isCompleted={completedWorkIds.includes(w.id)}
+              onClick={onOpenWork}
+            />
           ))}
         </div>
       ) : (

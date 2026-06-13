@@ -54,6 +54,23 @@
       .card-author span { font-size: 12px; color: #888; }
       .card-likes { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #999; }
       .card-likes .heart { color: #e74c3c; }
+      .card-cover-wrap { position: relative; }
+      .completion-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(56, 142, 60, 0.95);
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        backdrop-filter: blur(4px);
+      }
+      .completion-badge .completion-check { font-size: 12px; font-weight: 700; }
 
       /* ===== Detail Page ===== */
       .detail-page { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
@@ -93,6 +110,33 @@
       .action-btn:hover { background: #e8e0d0; }
       .action-btn.liked { background: #fce4ec; color: #e74c3c; }
       .action-btn.favorited { background: #fff3e0; color: #f57c00; }
+      .action-btn.completed { background: #e8f5e9; color: #388e3c; }
+      .completion-status-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        background: #e8f5e9;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .completion-status-bar.completed { background: #e8f5e9; }
+      .completion-status-bar.not-completed { background: #f5f2ec; }
+      .completion-status-icon { font-size: 20px; }
+      .completion-status-text { flex: 1; }
+      .completion-status-text .title { font-size: 14px; font-weight: 600; color: #333; }
+      .completion-status-text .desc { font-size: 12px; color: #888; margin-top: 2px; }
+      .btn-toggle-complete {
+        padding: 8px 20px;
+        border-radius: 16px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all .2s;
+      }
+      .btn-toggle-complete.completed { background: #fff; color: #388e3c; border: 1px solid #c8e6c9; }
+      .btn-toggle-complete.completed:hover { background: #f1f8e9; }
+      .btn-toggle-complete.not-completed { background: #388e3c; color: #fff; }
+      .btn-toggle-complete.not-completed:hover { background: #2e7d32; }
 
       /* Comments */
       .comments-section { margin-top: 24px; }
@@ -152,6 +196,72 @@
       .btn-manage:hover { border-color: #b8860b; color: #b8860b; }
       .btn-manage.danger { border-color: #e74c3c; color: #e74c3c; }
       .btn-manage.danger:hover { background: #fce4ec; }
+
+      /* History card */
+      .history-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 4px rgba(0,0,0,.05);
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        cursor: pointer;
+        transition: all .2s;
+      }
+      .history-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+        transform: translateY(-1px);
+      }
+      .history-cover {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+      .history-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .history-title {
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .history-meta {
+        font-size: 12px;
+        color: #999;
+        margin-bottom: 6px;
+      }
+      .history-time {
+        font-size: 12px;
+        color: #388e3c;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .history-check {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background: #388e3c;
+        color: #fff;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 16px;
+        font-size: 10px;
+        font-weight: 700;
+      }
+      .history-arrow {
+        color: #ccc;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
 
       /* ===== Modal ===== */
       .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 200; display: flex; align-items: center; justify-content: center; }
