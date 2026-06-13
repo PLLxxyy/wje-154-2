@@ -105,24 +105,40 @@ export const Profile: React.FC<Props> = ({ works, authors, currentUser, completi
         </div>
       ) : tab === 'works' ? (
         <div>
-          {myWorks.map((w) => (
-            <div key={w.id} className="work-manage-card">
-              <img src={w.cover} alt={w.title} />
-              <div className="work-manage-info">
-                <h4>{w.title}</h4>
-                <p>{w.category} | {w.difficulty} | {w.likes.length} 赞 | {w.comments.length} 评论</p>
-                <p style={{ fontSize: 11, color: w.published ? '#388e3c' : '#e74c3c', marginTop: 2 }}>
-                  {w.published ? '已上架' : '已下架'}
-                </p>
+          {myWorks.map((w) => {
+            const completed = completedWorkIds.includes(w.id);
+            return (
+              <div key={w.id} className="work-manage-card">
+                <div className="manage-cover-wrap">
+                  <img src={w.cover} alt={w.title} className="manage-cover-img" />
+                  {completed && (
+                    <div className="completion-badge">
+                      <span className="completion-check">✓</span>
+                      <span>已完成</span>
+                    </div>
+                  )}
+                </div>
+                <div className="work-manage-info">
+                  <h4>{w.title}</h4>
+                  <p>{w.category} | {w.difficulty} | {w.likes.length} 赞 | {w.comments.length} 评论</p>
+                  <p style={{ fontSize: 11, marginTop: 2, display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <span style={{ color: w.published ? '#388e3c' : '#e74c3c' }}>
+                      {w.published ? '已上架' : '已下架'}
+                    </span>
+                    {completed && (
+                      <span style={{ color: '#388e3c' }}>✓ 已完成学习</span>
+                    )}
+                  </p>
+                </div>
+                <div className="work-manage-actions">
+                  <button className="btn-manage" onClick={() => onOpenWork(w.id)}>查看</button>
+                  <button className="btn-manage" onClick={() => onTogglePublish(w.id)}>
+                    {w.published ? '下架' : '上架'}
+                  </button>
+                </div>
               </div>
-              <div className="work-manage-actions">
-                <button className="btn-manage" onClick={() => onOpenWork(w.id)}>查看</button>
-                <button className="btn-manage" onClick={() => onTogglePublish(w.id)}>
-                  {w.published ? '下架' : '上架'}
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="waterfall">

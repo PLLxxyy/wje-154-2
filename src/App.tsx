@@ -4,7 +4,7 @@ import { seedIfNeeded } from './utils/seed';
 import {
   getWorks, getAuthors, getCurrentUser, setCurrentUser, clearCurrentUser,
   updateWork, getAuthorById, updateAuthor,
-  getCompletions, toggleCompletion, getCompletionsByUser,
+  getCompletions, toggleCompletion,
 } from './utils/storage';
 import { Header } from './components/Header';
 import { LoginModal } from './components/LoginModal';
